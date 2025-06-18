@@ -1,0 +1,75 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SKTA AI Assistant</title>
+  <script src="https://cdn.jsdelivr.net/npm/botui/build/botui.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/botui/build/botui.min.css" />
+  <style>
+    body { font-family: sans-serif; background: #cce6ff; padding: 20px; }
+    #logo { max-width: 150px; display: block; margin: 0 auto 10px; }
+    #botui-app { background: #fff; padding: 15px; border-radius: 8px; }
+    h2 { text-align: center; }
+  </style>
+</head>
+<body>
+  <img id="logo" src="LOGO_SKTA.jpg" alt="SKTA Logo" />
+  <h2>SKTA AI Assistant</h2>
+  <div id="botui-app"></div>
+
+  <script>
+    const knowledge = {
+      timetable: {
+        en: "School starts at 7:20 AM. Monday to Thursday ends at 1:10 PM. Friday ends at 11:10 AM. Lesson slots: 7:20-7:50, 7:50-8:20, 8:20-8:50, 8:50-9:20, 9:20-9:50, 9:50-10:10 (break), 10:10-10:40, 10:40-11:10, 11:10-11:40, 11:40-12:10, 12:10-12:40, 12:40-1:10. Full timetable: <a href='Jadual_Waktu_SKTA_2025.pdf' target='_blank'>Download PDF</a>",
+        bm: "Sekolah bermula 7:20 pagi. Isnin hingga Khamis tamat 1:10 tengahari. Jumaat tamat 11:10 pagi. Sesi waktu: 7:20-7:50, 7:50-8:20, 8:20-8:50, 8:50-9:20, 9:20-9:50, 9:50-10:10 (rehat), 10:10-10:40, 10:40-11:10, 11:10-11:40, 11:40-12:10, 12:10-12:40, 12:40-1:10. Jadual penuh: <a href='Jadual_Waktu_SKTA_2025.pdf' target='_blank'>Muat turun PDF</a>"
+      },
+      exam_dates: {
+        en: "UASA: 5-9 October 2025.",
+        bm: "UASA: 5-9 Oktober 2025."
+      },
+      staff_directory: {
+        en: "Headmaster: Mr Hamka bin Wahab. Senior Assistant 1: Mrs Aloya bt Narawi. Senior Assistant HEM: Mr Jidi anak Nyohor. Senior Assistant Co-Curriculum: Mr Mohammad bin Rentek. Teachers: Ms Azlina bt Sudin, Ms Dayang Hanida bt Abang Usop, Ms Dayang Rosni bt Awang Chee, Mr Deskandar bin Morjidi, Ms Eznainie Marleeda bt Mahmud, Ms Hajijah bt Taha, Mr Khalismady bin Hj Simin, Ms Maemie bt Julaihi, Mr Mohamad Kelana bin Mat, Ms Noor Fadhilah bt Kamaruddin, Mr Radzizi bin Jumhari, Ms Rosfazila bt Mohd Zain, Ms Siti Hawa bt Salim, Ms Siti Nor Hidayah bt Ngapan, Ms Nadzifah (Pre-school).",
+        bm: "Guru Besar: En Hamka bin Wahab. Penolong Kanan 1: Pn Aloya bt Narawi. Penolong Kanan HEM: En Jidi anak Nyohor. Penolong Kanan Ko-Kurikulum: En Mohammad bin Rentek. Guru: Pn Azlina bt Sudin, Pn Dayang Hanida bt Abang Usop, Pn Dayang Rosni bt Awang Chee, En Deskandar bin Morjidi, Pn Eznainie Marleeda bt Mahmud, Pn Hajijah bt Taha, En Khalismady bin Hj Simin, Pn Maemie bt Julaihi, En Mohamad Kelana bin Mat, Pn Noor Fadhilah bt Kamaruddin, En Radzizi bin Jumhari, Pn Rosfazila bt Mohd Zain, Pn Siti Hawa bt Salim, Pn Siti Nor Hidayah bt Ngapan, Pn Nadzifah (Pra-sekolah)."
+      }
+    };
+
+    let language = 'en';
+    const botui = new BotUI('botui-app');
+
+    botui.message.add({ content: 'Welcome / Selamat datang! Please choose a language / Sila pilih bahasa:' }).then(() => {
+      return botui.action.button({
+        action: [
+          { text: 'English', value: 'en' },
+          { text: 'BM', value: 'bm' }
+        ]
+      });
+    }).then(res => {
+      language = res.value;
+      greetUser();
+    });
+
+    function greetUser() {
+      const msg = language === 'en' ? 'How can I help you today?' : 'Bagaimana saya boleh bantu anda hari ini?';
+      botui.message.add({ content: msg });
+      askQuestion();
+    }
+
+    function askQuestion() {
+      botui.action.text({
+        action: { placeholder: language === 'en' ? 'Type your question...' : 'Taip soalan anda...' }
+      }).then(res => {
+        const reply = getReply(res.value.toLowerCase());
+        botui.message.add({ content: reply }).then(() => askQuestion());
+      });
+    }
+
+    function getReply(input) {
+      if (input.includes('timetable') || input.includes('jadual')) return knowledge.timetable[language];
+      if (input.includes('exam') || input.includes('uasa') || input.includes('peperiksaan')) return knowledge.exam_dates[language];
+      if (input.includes('staff') || input.includes('guru')) return knowledge.staff_directory[language];
+      return language === 'en' ? "Sorry, I don't have information on that." : "Maaf, saya tiada maklumat tentang itu.";
+    }
+  </script>
+</body>
+</html>
